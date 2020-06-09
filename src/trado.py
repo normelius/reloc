@@ -30,7 +30,7 @@ class Trado():
         connect_client: Connect to client by specifying
         the host and port that the server is connected to.
 
-        disconnect_client: Disconnects from the socket
+        disconnect: Disconnects from the socket
         that the client is connected to.
 
         ping: Serves as a transciever method for sending
@@ -50,7 +50,6 @@ class Trado():
     def __init__(self):
         self.sock = socket.socket(
                 socket.AF_INET, socket.SOCK_STREAM)
-        #self.default_path = Path.home()
 
     def connect_client(self, host, port, is_async = False,
             timeout = None):
@@ -93,7 +92,7 @@ class Trado():
         self.sock.settimeout(timeout)
         self.sock.connect((host, port))
 
-    def disconnect_client(self):
+    def disconnect(self):
         """
         Disconnects the socket in the client.
         """
@@ -154,6 +153,7 @@ class Trado():
                 elif sub_item.is_file() and str(sub_item.stem)[0] != '.':
                     item.type_ = "file"
                     item.name = child_path.name
+                    item.size = child_path.stat().st_size
                     with open(str(sub_item), 'r') as f:
                         item.content = f.read()
 
@@ -195,8 +195,6 @@ class Trado():
 
         elif parent_path.is_file():
             print("Successfully sent file: {}".format(parent_path.name))
-
-        self.disconnect_client()
 
 
     ## Server side code below ##
@@ -464,11 +462,12 @@ class Trado():
             while True:
                 conn, adr = self.sock.accept()
                 with conn:
-                    print("Connected by client: {}".format(adr))
+                    print("Connected by client {} on port {}.".format(adr[0], adr[1]))
                     if self.use_log:
                         self.__update_log('info', 'Connected by client {} on port {}.'.format(
                             adr[0], adr[1]))
-                    byte = list()
+
+                    byte_data = list()
                     while True:
                         partial = conn.recv(2**16)
                         if len(partial) <= 0:
@@ -476,10 +475,10 @@ class Trado():
                         
                         # Appending the partial data to list is a lot
                         # faster than concatenate byte strings.
-                        byte.append(partial)
+                        byte_data.append(partial)
 
-                    if byte:
-                        data = pickle.loads(b''.join(byte))
+                    if byte_data:
+                        data = pickle.loads(b''.join(byte_data))
                         for item in data:
                             path = self.def_path / item.path
                             if item.type_ == "folder":
@@ -496,7 +495,6 @@ class Trado():
                                 if self.use_log: 
                                     self.__update_log('info', 'Saved file "{}" on path {}.'.format(
                                         item.name, path))
-                                
 
 
 
