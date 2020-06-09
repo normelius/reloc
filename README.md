@@ -7,7 +7,7 @@
  
 ## Installation
 ```bash
-pip3 install trado
+Soon updated
 ```
  
 ## Usage
