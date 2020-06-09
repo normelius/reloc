@@ -43,9 +43,6 @@ class Trado():
         or not, based on if the user is running the client
         on the main thread or not, which is specified by the
         'is_async' param in the connect_client method.
-
-
-
     """
     def __init__(self):
         self.sock = socket.socket(
@@ -265,6 +262,7 @@ class Trado():
         
         print("Server connected to host: {}".format(host))
         print("Server connected to port: {}".format(port))
+        print("Saving files to path: ".format(self.default_path))
         if self.use_log:
             self.__update_log('info', 'Server started on host {}, port {}.'.format(host, port))
 
@@ -277,7 +275,7 @@ class Trado():
         Exceptions will be stored as well.
 
         Params:
-            type_ (str): Specify the type of event that
+            log_type (str): Specify the type of event that
             will be logged. Can be 'info' and 'exception' for now.
 
             msg (str): Message to be written to the log.
