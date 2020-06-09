@@ -20,13 +20,16 @@ import os
 import datetime
 from threading import Thread, active_count
 
+# Package imports
+from .util import Item
+
 class Trado():
     """
     Whole client and server is represented as a class.
     Methods:
         connect_client: Connect to client by specifying
         the host and port that the server is connected to.
-            
+
         disconnect_client: Disconnects from the socket
         that the client is connected to.
 
@@ -47,24 +50,52 @@ class Trado():
     def __init__(self):
         self.sock = socket.socket(
                 socket.AF_INET, socket.SOCK_STREAM)
-        self.log = None
-        self.default_path = Path.home()
+        #self.default_path = Path.home()
 
-    def connect_client(self, host, port, is_async = False):
+    def connect_client(self, host, port, is_async = False,
+            timeout = None):
         """
         Initiate connectiong with the socket.
         Params:
-            host (str): e.g. 192.168.0.110
-            port (int): e.g. 1337
+            host (str): Should be the same host, i.e. ip as the 
+            server is connected to.
+
+            port (int): Should be the same port that the server
+            is connected to.
+
+            is_async (bool): Specify whether the client should send
+            files on a separate thread. In case of transmission of 
+            large files, one might not want to occupy the 
+            main thread. Observe that generally file transfer 
+            is quite fast, so this shouldn't really be necessary.
+            Default: False.
+
+            timeout (float): Specify how long the client will
+            try to connect to the server before it stops.
+            Specify this as None will disable the timeout.
+            Default: None.
+
         """
         self.is_async = is_async
-        self._host = host
-        self._port = port
-        self.sock.connect((self._host, self._port))
+
+        if not isinstance(host, str):
+            raise TypeError("Host specified on the wrong format, " \
+                    "should be a str, i.e. '127.0.0.1'.")
+        
+        if not isinstance(port, int):
+            raise TypeError("Port specified on the wrong format, " \
+                    "should be an int, i.e. 1750.")
+    
+        if not isinstance(timeout, (type(None), int, float)) :
+            raise TypeError("Timeout specified on the wrong format, " \
+                    "should be an int or a float, i.e. 7 or 7.7")
+
+        self.sock.settimeout(timeout)
+        self.sock.connect((host, port))
 
     def disconnect_client(self):
         """
-        Disconnects the used socket in the client.
+        Disconnects the socket in the client.
         """
         self.sock.close()
 
@@ -132,8 +163,8 @@ class Trado():
             raise FileNotFoundError(
                     errno.ENOENT, os.strerror(errno.ENOENT), item_name)
         
-        # Data should be sent in a separate thread in order to avoid 
-        # blocking the main thread.
+        # Data can be sent in a separate thread in order to avoid 
+        # blocking the main thread. This is optional.
         if self.is_async:
             client_thread = Thread(target = self.__transmit_file, args =
             (transmit_data, parent_path))
@@ -165,11 +196,14 @@ class Trado():
         elif parent_path.is_file():
             print("Successfully sent file: {}".format(parent_path.name))
 
+        self.disconnect_client()
 
-    ## SERVER-SIDE CODE BELOW ##
+
+    ## Server side code below ##
     ## ______________________ ##
     def connect_server(self, mode = 'internal', port = None, 
-            host = None, is_async = False, use_log = False):
+            host = None, def_path = None, 
+            is_async = False, use_log = False):
         """
         Initiate connection with the server. By defualt, 
         connection is internal, meaning only local 
@@ -201,6 +235,11 @@ class Trado():
             to handle this better in the future.
             Default: None.
 
+            def_path (str): Specify the default path for files and folders
+            to be written to, e.g. /users/antonnormelius/documents.
+            If specified path doesn't exist, error will be raised.
+            Default: None (i.e. home folder will be used).
+
             is_async (bool): If need to run the server separate from 
             the main thread, and making it non-blocking. Since the
             file transfer is quite fast, this shouldn't really be 
@@ -216,10 +255,27 @@ class Trado():
             for the server.
             Defualt: False.
         """
-
+        
         self.is_async = is_async
         self.use_log = use_log
+        self.log = None
+
+        # If default_path isn't specified, use the home directory as
+        # the default path.
+        if not def_path:
+            self.def_path = Path.Home()
         
+        else:
+            if not isinstance(def_path, str):
+                raise TypeError("Wrong format on default path, should " \
+                        "be a str, i.e. /users/antonnormelius/documents")
+
+            if not Path(def_path).absolute().exists():
+                raise FileNotFoundError(
+                    errno.ENOENT, os.strerror(errno.ENOENT), str(def_path))
+
+            self.def_path = Path(def_path)
+
         if self.use_log:
             self.__update_log('info', 'Starting server.')
 
@@ -283,9 +339,6 @@ class Trado():
         if not folder.exists():
             os.makedirs(folder)
             
-        date_today = Path(str(datetime.datetime.today().date()))
-        log_path = Path(str(folder / date_today) + '.log')
-            
         if not self.log:
             self.log = logging.getLogger(__name__) 
             self.log.setLevel(logging.INFO)
@@ -295,6 +348,8 @@ class Trado():
             handler.setFormatter(formatter)
             self.log.addHandler(handler)
             
+        date_today = Path(str(datetime.datetime.today().date()))
+        log_path = Path(str(folder / date_today) + '.log')
         if not log_path.exists():
             # Create new handler
             new_handler = logging.FileHandler(log_path, 'a')
@@ -323,9 +378,6 @@ class Trado():
         If specified path doesn't exist, error will be raised.
 
         Params:
-            new_path (str): Specify the default path for files and folders
-            to be written to, e.g. /users/antonnormelius/documents.
-            If specified path doesn't exist, error will be raised.
         """
         if new_path[0] != '/':
             new_path = '/' + new_path
@@ -407,7 +459,7 @@ class Trado():
         In case of receiving a folder, all items in the folder
         will be saved.
         """
-        print("Saving files to path: {}".format(self.default_path))
+        print("Saving files to path: {}".format(self.def_path))
         with self.sock:
             while True:
                 conn, adr = self.sock.accept()
@@ -429,7 +481,7 @@ class Trado():
                     if byte:
                         data = pickle.loads(b''.join(byte))
                         for item in data:
-                            path = self.default_path / item.path
+                            path = self.def_path / item.path
                             if item.type_ == "folder":
                                 if not path.exists():
                                     os.makedirs(path)
@@ -445,21 +497,6 @@ class Trado():
                                     self.__update_log('info', 'Saved file "{}" on path {}.'.format(
                                         item.name, path))
                                 
-
-
-class Item():
-    """
-    Class to contain a single item,
-    which is represented as a file or folder.
-    """
-    def __init__(self):
-        self.name = None
-        self.path = None
-        self.content = None
-        self.type_ = None
-        self.size = None
-        self.mtime = None
-        self.suffix = None
 
 
 
