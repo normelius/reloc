@@ -47,8 +47,8 @@ class Trado():
     def __init__(self):
         self.sock = socket.socket(
                 socket.AF_INET, socket.SOCK_STREAM)
-        self.default_path = Path.home()
         self.log = None
+        self.default_path = Path.home()
 
     def connect_client(self, host, port, is_async = False):
         """
@@ -262,7 +262,6 @@ class Trado():
         
         print("Server connected to host: {}".format(host))
         print("Server connected to port: {}".format(port))
-        print("Saving files to path: ".format(self.default_path))
         if self.use_log:
             self.__update_log('info', 'Server started on host {}, port {}.'.format(host, port))
 
@@ -337,6 +336,7 @@ class Trado():
                     errno.ENOENT, os.strerror(errno.ENOENT), str(new_path))
 
         self.default_path = new_path
+    
 
     def __portscan(self, host):
         """
@@ -407,6 +407,7 @@ class Trado():
         In case of receiving a folder, all items in the folder
         will be saved.
         """
+        print("Saving files to path: {}".format(self.default_path))
         with self.sock:
             while True:
                 conn, adr = self.sock.accept()
