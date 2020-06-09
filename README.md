@@ -13,15 +13,14 @@ Soon updated
  
 ## Usage
 #### Server-side
-Start server where you want to receive files. If no path is specified the home folder is used. Two modes of the server can be used; internal or external. By using the internal mode, only connection over the local network is possible.Bby using external mode, connection to the server can be made if the used port has been forward in the router.
+Start server where you want to receive files. If no path is specified the home folder is used. Two modes of the server can be used; internal or external. By using the internal mode, only connection over the local network is possible.Bby using external mode, connection to the server can be made if the used port is open in the network.
 
 
 ```python
 import trado
 
 server = trado.trado()
-# Connecting externally, i.e. connection 
-# over the internet is possible.
+# Connecting externally, i.e. connect over the internet.
 server.connect_server(mode = 'external', host = '92.34.13.274', port = 1750,
     def_path = '/users/antonnormelius/documents')
 server.receive()
@@ -37,10 +36,10 @@ import trado
 client = trado.trado()
 client.connect_client(host = '92.34.13.274', port = 1750)
 
-# Sending a text file
+# Sending a text file.
 filename = 'test.txt'
 
-# Sending a folder
+# Sending a folder.
 foldername = 'test'
 client.transmit(foldername)
 
