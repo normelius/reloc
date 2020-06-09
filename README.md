@@ -38,6 +38,7 @@ client.connect_client(host = '92.34.13.274', port = 1750)
 
 # Sending a text file.
 filename = 'test.txt'
+client.transmit(filename)
 
 # Sending a folder.
 foldername = 'test'
