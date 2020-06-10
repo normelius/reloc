@@ -1,4 +1,5 @@
 """
+Reloc
 @ 2020, Anton Normelius.
 Simple file transfer library between client and server,
 based on the socket library.
@@ -21,7 +22,7 @@ import datetime
 from threading import Thread, active_count
 
 # Package imports
-from .util import Item
+from . import util
 
 class Reloc():
     """
@@ -120,7 +121,7 @@ class Reloc():
         # For now, dotfiles are not allowed to be transfered
         # since usual utf-8 codec can't decode the bytes.
         if parent_path.is_file() and str(parent_path.stem)[0] != '.':
-            item = Item()
+            item = util.Item()
             item.path = parent_path.name
             item.type_ = "file"
             item.mtime = parent_path.stat().st_mtime
@@ -134,14 +135,14 @@ class Reloc():
         elif parent_path.is_dir():
             
             # Add parent folder first
-            item = Item()
+            item = util.Item()
             item.path = parent_path.stem
             item.type_ = "folder"
             transmit_data.append(item)
             
             # Iterate over all subfolders- and files
             for sub_item in parent_path.rglob("*"):
-                item = Item()
+                item = util.Item()
                 child_path = parent_path.stem / sub_item.relative_to(parent_path)
                 item.path = child_path
                 # If folder
@@ -476,8 +477,8 @@ class Reloc():
         print("Saving files to path: {}".format(self.def_path))
         with self.sock:
             while True:
-                conn, adr = self.sock.accept()
-                with conn:
+                connection, adr = self.sock.accept()
+                with connection:
                     print("Connected by client {} on port {}.".format(adr[0], adr[1]))
                     if self.use_log:
                         self._update_log('info', 'Connected by client {} on port {}.'.format(
@@ -485,7 +486,7 @@ class Reloc():
 
                     byte_data = list()
                     while True:
-                        partial = conn.recv(2**16)
+                        partial = connection.recv(2**16)
                         if len(partial) <= 0:
                             break
                         
@@ -495,6 +496,7 @@ class Reloc():
 
                     if byte_data:
                         data = pickle.loads(b''.join(byte_data))
+                        
                         for item in data:
                             path = self.def_path / item.path
                             if item.type_ == "folder":
@@ -513,4 +515,4 @@ class Reloc():
                                         item.name, path))
 
 
-
+        print("Disconnect")
