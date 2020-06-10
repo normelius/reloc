@@ -1,2 +1,3 @@
-# Imports from important files
-from .trado import Trado, Item
+
+# Imports
+from .reloc import Reloc, Item
