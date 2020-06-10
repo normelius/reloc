@@ -4,13 +4,10 @@
 from context import src
 
 def main():
-    server = src.Trado()
-    server.connect_server(mode = 'internal',
-            port = 1337)
-    server.add_path('users/antonnormelius/documents')
-    print("Before receiving")
+    server = src.Reloc()
+    server.connect_server(mode = 'internal', host = 'localhost', port = 1750,
+            def_path = '/users/antonnormelius/documents')
     server.receive()
-    print("After receiving")
 
 
 if __name__ == '__main__':

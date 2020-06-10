@@ -4,14 +4,16 @@
 from context import src
 
 def main():
-    host = '192.168.1.21'
-    port = 1337
-    client = src.Trado()
-    client.connect_client(host, port)
-    file_ = 'try_to_send_me'
-    print("Before transmitting file")
-    client.transmit(file_)
-    print("After transmitting file")
+    #host = '192.168.1.21'
+    host = 'localhost'
+    port = 1750
+    filename = 'try_to_send_me'
+
+    client = src.Reloc()
+    client.connect_client(host = host, port = port)
+    client.transmit(filename)
+
+    client.disconnect()
 
 if __name__ == '__main__':
     main()
