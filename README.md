@@ -1,4 +1,4 @@
-# Trado
+# Reloc
 ## Observe that this is still under development and is being continuously updated.
 
 ## Features
