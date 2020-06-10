@@ -9,7 +9,7 @@ def main():
     port = 1750
     filename = 'try_to_send_me'
 
-    client = src.Reloc()
+    client = src.reloc.Reloc()
     client.connect_client(host = host, port = port)
     client.transmit(filename)
 

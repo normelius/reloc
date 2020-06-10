@@ -4,7 +4,7 @@
 from context import src
 
 def main():
-    server = src.Reloc()
+    server = src.reloc.Reloc()
     server.connect_server(mode = 'internal', host = 'localhost', port = 1750,
             def_path = '/users/antonnormelius/documents')
     server.receive()
