@@ -1,7 +1,7 @@
 # Author: norme
 # Example code for client side.
 
-from context import src
+import reloc
 
 def main():
     #host = '192.168.1.21'
@@ -9,7 +9,7 @@ def main():
     port = 1750
     filename = 'try_to_send_me'
 
-    client = src.reloc.Reloc()
+    client = reloc.Reloc()
     client.connect_client(host = host, port = port)
     client.transmit(filename)
 
