@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="reloc",
+    name="reloc-normelius",
     version="0.0.1",
     author="Anton Normelius",
     author_email="a.normelius@gmail.com",
@@ -12,11 +12,14 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/normelius/reloc",
-    packages=setuptools.find_packages(),
+    packages=['reloc'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    entry_points = {
+        'console_scripts': ['reloc=reloc.cli:cli_transmit'],
+    }
 )
