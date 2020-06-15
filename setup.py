@@ -13,12 +13,15 @@ PYTHON_REQUIRES = ">=3.6"
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-# Read latest version
+# Read latest version.
 VER = {}
 version_path = convert_path("reloc/__version__.py")
 with open(version_path) as version_file:
     exec(version_file.read(), VER)
 
+# Read requirements.
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
 
 setuptools.setup(
     name=NAME,
@@ -29,6 +32,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url=URL,
+    install_requires=required,
     packages=PACKAGES,
     classifiers=[
         "Programming Language :: Python :: 3",
