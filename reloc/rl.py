@@ -1,8 +1,7 @@
 """
 Reloc
 @ 2020, Anton Normelius.
-Simple file transfer library between client and server,
-based on the socket library.
+Simple file transfer package between client and server.
 MIT License.
 """
 

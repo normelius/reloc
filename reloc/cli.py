@@ -1,15 +1,14 @@
 """
 Reloc
 @ 2020, Anton Normelius.
-Simple file transfer library between client and server,
-based on the socket library.
+Simple file transfer package between client and server.
 MIT License.
 """
 
 # Imports
 import argparse
 
-# Reloc package imports
+# Reloc module imports
 from reloc.rl import Reloc
 
 def cli_args():
@@ -41,11 +40,13 @@ def cli_args():
             raise ValueError("When using external mode, both host and port needs " \
                     "specified with optional arguments.")
         
-    if not args.host:
-        args.host = 'localhost'
+    if args.mode.lower() == 'internal':
+        if not args.host:
+            args.host = 'localhost'
 
-    if not args.port:
-        args.port = 1750
+        if not args.port:
+            # For now, use port 1750.
+            args.port = 1750
 
     return args.filename, args.host, args.port
 
