@@ -17,12 +17,13 @@ Start server where you want to receive files. If no path is specified the home f
 
 
 ```python
-from reloc import Reloc
+import reloc
 
-server = Reloc()
 # Starting server to handle external connections, i.e. over the internet.
-server.connect_server(mode = 'external', host = '92.34.13.274', port = 1750,
-    def_path = '/users/antonnormelius/documents')
+server = reloc.server(mode = 'external', host = '92.34.13.274', 
+    port = 1750, def_path = '/users/antonnormelius/documents')
+
+# Start listening for incoming data stream.
 server.receive()
 ```
  
@@ -31,10 +32,10 @@ Client is used to transfer files and folders to server. Observe that
 the host and port for the client need to be the same as the host and port
 for the server. 
 ```python
-from reloc import Reloc
+import reloc
 
-client = Reloc()
-client.connect_client(host = '92.34.13.274', port = 1750)
+# Connecting to external server.
+client = reloc.client(host = '92.34.13.274', port = 1750)
 
 # Sending a text file.
 filename = 'test.txt'
