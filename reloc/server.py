@@ -23,6 +23,27 @@ from threading import Thread, active_count
 class Server():
     """
     Methods:
+        _update_log: Private method to update information to the log.
+
+        add_path: Let's the user add it's own default path for where
+        the receiving files will be saved. The home folder serves 
+        as the standardized default path.
+
+        _port_scan: Private method to handle portscanning to find
+        open ports. This is not yet implemented (and not sure if it will be).
+
+        _get_external_ip: Private method to get the external ip
+        of the computer that starts the server. Useful such that the user
+        doesn't have to specify the external ip.
+
+        _get_internal_ip: Private method to get the internal ip of the computer.
+
+        receive: Starts the listening process and calls _receive_file accordingly.
+        The user calls this method the will either run on the main thread, or
+        on a separate thread, depending on whether is_async is true.
+
+        _receive_file: Private method that handles the receiving of incoming
+        data streams.
     """
     def __init__(self, mode = 'internal', port = None,
             host = None, def_path = None,
