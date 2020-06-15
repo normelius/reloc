@@ -9,7 +9,7 @@ MIT License.
 import argparse
 
 # Reloc imports
-from client import Client
+from .client import Client
 
 def cli_args():
     """
