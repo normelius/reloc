@@ -20,6 +20,9 @@ import os
 import datetime
 from threading import Thread, active_count
 
+# Package imports
+from .util import Item
+
 class Client():
     """
     Methods:
@@ -191,16 +194,3 @@ class Client():
             print("Successfully sent file: {}".format(parent_path.name))
 
 
-class Item():
-    """
-    Class to contain a single item,
-    which is represented as a file or a folder.
-    """
-    def __init__(self):
-        self.name = None
-        self.path = None
-        self.content = None
-        self.type_ = None
-        self.size = 0
-        self.mtime = None
-        self.suffix = None
