@@ -6,14 +6,13 @@ MIT License.
 """
 
 # Imports
-from reloc import Reloc
+import reloc
 
 def main():
-    server = Reloc()
-    server.connect_server(mode = 'internal', host = 'localhost', port = 1750,
-            def_path = '/users/antonnormelius/documents')
-    server.receive()
 
+    # Connecting internally, i.e. in local network.
+    server = reloc.server(mode = 'internal', host = 'localhost')
+    server.receive()
 
 if __name__ == '__main__':
     main()
