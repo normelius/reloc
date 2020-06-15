@@ -13,7 +13,7 @@ $ pip3 install reloc
  
 ## Usage
 #### Server-side
-Start server where you want to receive files. If no path is specified the home folder is used. Two modes of the server can be used; internal or external. By using the internal mode, only connection over the local network is possible. By using external mode, connection to the server can be made ifover the internet if the specified port is open in the network.
+Start server where you want to receive files. If no path is specified the home folder is used. Two modes of the server can be used; internal or external. By using the internal mode, only connection over the local network is possible. By using external mode, connection to the server can be made over the internet if the specified port is open in the network.
 
 
 ```python
@@ -50,7 +50,7 @@ client.disconnect()
 
 ```
 
-## Usage - Command-Line Application
+#### Command-Line Application
 Reloc can be used as a command-line application in order to transfer files to the server
 using the command prompt, i.e. terminal.
 
