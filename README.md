@@ -55,16 +55,16 @@ using the command prompt, i.e. terminal.
 
 #### Internal transfer, i.e. over local network.
 ```bash
-$reloc internal file.txt
-$reloc internal folder
+$ reloc internal file.txt
+$ reloc internal folder
 ```
 
 #### External transfer, i.e. over the internet.
 Observe that both host and port needs to be specified in order
 to transfer files in external mode.
 ```bash
-$reloc external file.txt --host 92.34.13.274 --port 1750
-$reloc external folder --host 92.34.13.274 --port 1750
+$ reloc external file.txt --host 92.34.13.274 --port 1750
+$ reloc external folder --host 92.34.13.274 --port 1750
 ```
 
 ## License
