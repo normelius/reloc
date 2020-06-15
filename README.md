@@ -3,7 +3,7 @@
 ## Features
 * Serves as a simple file transfer service between client and server. Initially designed for easy transfer of files to single-board computers, such as the Raspberry Pi.
 * Can be used both locally on the network or externally over the internet.
-* CLI is available for easier transfer of files from the command prompt.
+* Reloc can be used as a command-line application for easier transfer of files from the command prompt.
 
  
 ## Installation
@@ -49,9 +49,9 @@ client.disconnect()
 
 ```
 
-## Usage - CLI
-Reloc can be used as a CLI in order to transfer files to the server
-using the command prompt.
+## Usage - Command-Line Application
+Reloc can be used as a command-line application in order to transfer files to the server
+using the command prompt, i.e. terminal.
 
 #### Internal transfer, i.e. over local network.
 ```bash
