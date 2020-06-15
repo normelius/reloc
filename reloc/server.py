@@ -133,7 +133,7 @@ class Server():
                 # Might need to change this. CLI won't work with internal command
                 # when internal ip is used. Might be better to user localhost or
                 # 127.0.0.1.
-                host = self._get_internal_ip()
+                host = 'localhost'
 
             if port and not isinstance(port, int):
                 raise ValueError("Port specified on the wrong format, " \
@@ -161,8 +161,7 @@ class Server():
                         "starting in external mode, need to specify the external ip.")
 
             if not host:
-                ips = self._get_external_ip()
-                host = ips['ipv4']
+                host = self._get_internal_ip()
 
             if not port:
                 raise ValueError("Need to specify an open port " \
@@ -182,6 +181,11 @@ class Server():
 
         print("Server connected to host: {}".format(host))
         print("Server connected to port: {}".format(port))
+        if mode.lower() == 'external':
+            ips = self._get_external_ip()
+            external_host = ips['ipv4']
+            print("External host: {}".format(external_host))
+
         if self.use_log:
             self._update_log('info', 'Server started on host {}, port {}.'.format(host, port))
 
