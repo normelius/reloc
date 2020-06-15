@@ -4,7 +4,7 @@ from distutils.util import convert_path
 NAME = "reloc"
 AUTHOR = "Anton Normelius"
 EMAIL = "a.normelius@gmail.com"
-DESCRIPTION = "Package for simple file transfer between client and server"
+DESCRIPTION = "A simple file transfer service"
 URL = "https://github.com/normelius/reloc"
 PACKAGES = ['reloc']
 PYTHON_REQUIRES = ">=3.6"
