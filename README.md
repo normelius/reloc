@@ -1,9 +1,9 @@
 # Reloc
-## Observe that this is still under development and is being continuously updated.
 
 ## Features
 * Serves as a simple file transfer service between client and server. Initially designed for easy transfer of files to single-board computers, such as the Raspberry Pi.
-* Can be used both locally on the network or over the internet.
+* Can be used both locally on the network or externally over the internet.
+* CLI is available for easier transfer of files from the command prompt.
 
  
 ## Installation
@@ -51,20 +51,20 @@ client.disconnect()
 
 ## Usage - CLI
 Reloc can be used as a CLI in order to transfer files to the server
-using command prompt.
+using the command prompt.
 
 #### Internal transfer, i.e. over local network.
 ```bash
-reloc internal file.txt
-reloc internal folder
+$reloc internal file.txt
+$reloc internal folder
 ```
 
 #### External transfer, i.e. over the internet.
 Observe that both host and port needs to be specified in order
 to transfer files in external mode.
 ```bash
-reloc external 92.34.13.274 1750 file.txt
-reloc external 92.34.13.274 1750 folder
+$reloc external file.txt --host 92.34.13.274 --port 1750
+$reloc external folder --host 92.34.13.274 --port 1750
 ```
 
 ## License
