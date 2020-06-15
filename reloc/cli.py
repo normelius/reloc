@@ -8,8 +8,8 @@ MIT License.
 # Imports
 import argparse
 
-# Reloc module imports
-from reloc.rl import Reloc
+# Reloc imports
+from client import Client
 
 def cli_args():
     """
@@ -56,8 +56,7 @@ def cli_transmit():
     on the users input arguments. 
     """
     filename, host, port = cli_args()
-    client = Reloc()
-    client.connect_client(host = host, port = port)
+    client = Client(host = host, port = port)
     client.transmit(filename)
     client.disconnect()
 
