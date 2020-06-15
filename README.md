@@ -8,7 +8,7 @@
  
 ## Installation
 ```bash
-Soon updated
+pip3 install reloc
 ```
  
 ## Usage
