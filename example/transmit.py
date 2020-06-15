@@ -5,15 +5,15 @@ Simple file transfer package between client and server.
 MIT License.
 """
 
-from reloc import Reloc
+# Imports
+import reloc
 
 def main():
-    client = Reloc()
+    folder = 'try_to_send_me'
 
-    filename = 'try_to_send_me'
-    client.connect_client(host = 'localhost', port = 1750)
-    client.transmit(filename)
-
+    # Connecting to server on internal network.
+    client = reloc.client(host = 'localhost', port = 1750)
+    client.transmit(folder)
     client.disconnect()
 
 if __name__ == '__main__':
