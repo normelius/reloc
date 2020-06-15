@@ -1,16 +1,17 @@
-# Author: norme
-# Example code for client side.
+"""
+Reloc
+@ 2020, Anton Normelius.
+Simple file transfer package between client and server.
+MIT License.
+"""
 
-import reloc
+from reloc import Reloc
 
 def main():
-    #host = '192.168.1.21'
-    host = 'localhost'
-    port = 1750
-    filename = 'try_to_send_me'
+    client = Reloc()
 
-    client = reloc.Reloc()
-    client.connect_client(host = host, port = port)
+    filename = 'try_to_send_me'
+    client.connect_client(host = 'localhost', port = 1750)
     client.transmit(filename)
 
     client.disconnect()
