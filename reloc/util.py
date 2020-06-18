@@ -8,6 +8,7 @@ MIT License.
 class Item():
     """
     Information about a single file/folder.
+    Used when transfering the files to the server.
     """
     def __init__(self):
         self.name = None
