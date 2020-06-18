@@ -23,8 +23,8 @@ Start server where you want to receive files. If no path is specified the home f
 import reloc
 
 # Starting server to handle external connections, i.e. over the internet.
-server = reloc.server(mode = 'external', host = '92.34.13.274', 
-    port = 1750, def_path = '/users/antonnormelius/documents')
+server = reloc.server(mode = 'external', port = 1750, 
+    def_path = '/users/antonnormelius/documents')
 
 # Start listening for incoming data stream.
 server.receive()
