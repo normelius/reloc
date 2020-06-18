@@ -57,18 +57,31 @@ client.disconnect()
 Reloc can be used as a command-line application in order to transfer files to the server
 using the command prompt, i.e. terminal.
 
-###### Internal transfer, i.e. over local network.
+###### Transfer of files/folders.
 ```bash
-$ reloc internal file.txt
-$ reloc internal folder
+# Send file internally.
+$ reloc send file.txt
+
+# Send folder internally.
+$ reloc send foldername
+
+# Send file externally.
+$ reloc send file.txt --host 92.34.13.274 --port 1750
+
+# Send folder externally.
+$ reloc send foldername --host 92.34.13.274 --port 1750
 ```
 
-###### External transfer, i.e. over the internet.
-Observe that both host and port needs to be specified in order
-to transfer files in external mode.
+###### Start server both internally and externally.
 ```bash
-$ reloc external file.txt --host 92.34.13.274 --port 1750
-$ reloc external folder --host 92.34.13.274 --port 1750
+# Start internal server, i.e. using localhost and predefined port.
+$ reloc start internal
+
+# Start external server. Observe that port needs to be specified.
+$ reloc start external 1750
+
+# Start external server on predefined host and port.
+$ reloc start external 1750 --host 192.168.1.10
 ```
 
 ## Releases
