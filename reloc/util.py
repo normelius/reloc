@@ -16,5 +16,12 @@ class Item():
         self.content = None
         self.type_ = None
         self.size = 0
-        self.mtime = None
+        self.mtime = 0
         self.suffix = None
+
+    def __eq__(self, other):
+        """
+        Method to compare objects by path.
+        """
+        if self.path == other.path:
+            return True
