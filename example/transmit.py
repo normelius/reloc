@@ -14,7 +14,6 @@ def main():
     # Connecting to server on internal network.
     client = reloc.client(host = 'localhost', port = 1750)
     client.transmit(folder)
-    client.disconnect()
 
 if __name__ == '__main__':
     main()
