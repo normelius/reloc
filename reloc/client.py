@@ -70,30 +70,39 @@ class Client():
             Default: None.
 
         """
-        self.sock = socket.socket(
-                socket.AF_INET, socket.SOCK_STREAM)
         self.is_async = is_async
+        self.ues_backup = False
+        self.timeout = timeout
+        self.host = host
+        self.port = port
 
-        if not isinstance(host, str):
+        if not isinstance(self.host, str):
             raise TypeError("Host specified on the wrong format, " \
                     "should be a str, i.e. '127.0.0.1'.")
 
-        if not isinstance(port, int):
+        if not isinstance(self.port, int):
             raise TypeError("Port specified on the wrong format, " \
                     "should be an int, i.e. 1750.")
 
-        if not isinstance(timeout, (type(None), int, float)) :
+        if not isinstance(self.timeout, (type(None), int, float)) :
             raise TypeError("Timeout specified on the wrong format, " \
                     "should be an int or a float, i.e. 7 or 7.7")
+        
+        # Connect to the socket
+        self._connect()
 
-        self.sock.settimeout(timeout)
-        self.sock.connect((host, port))
+    def _connect(self):
+        self.sock = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(self.timeout)
+        self.sock.connect((self.host, self.port))
 
-    def disconnect(self):
+    def _disconnect(self):
         """
         Disconnects the socket in the client.
         """
         self.sock.close()
+        self.sock = None
 
     def ping(self):
         """
@@ -112,63 +121,78 @@ class Client():
             to the server.
         """
         parent_path = pathlib.Path(item_name).absolute()
-        transmit_data = list()
+        
+        while True:
+            transmit_data = list()
 
-        # For now, dotfiles are not allowed to be transfered
-        # since usual utf-8 codec can't decode the bytes.
-        if parent_path.is_file() and str(parent_path.stem)[0] != '.':
-            item = Item()
-            item.path = parent_path.name
-            item.type_ = "file"
-            item.mtime = parent_path.stat().st_mtime
-            item.size = parent_path.stat().st_size
-            item.suffix = parent_path.suffix
-            with open(str(parent_path), 'r') as f:
-                item.content = f.read()
+            # Need to create new socket for each sendall,
+            # otherwise connection won't close server side.
+            if not self.sock:
+                self._connect()
 
-            transmit_data.append(item)
-
-        elif parent_path.is_dir():
-
-            # Add parent folder first
-            item = Item()
-            item.path = parent_path.stem
-            item.type_ = "folder"
-            transmit_data.append(item)
-
-            # Iterate over all subfolders- and files
-            for sub_item in parent_path.rglob("*"):
+            # Handle single file transfer.
+            if parent_path.is_file() and str(parent_path.stem)[0] != '.':
                 item = Item()
-                child_path = parent_path.stem / sub_item.relative_to(parent_path)
-                item.path = child_path
-                # If folder
-                if sub_item.is_dir():
-                    item.type_ = "folder"
-                    transmit_data.append(item)
+                item.mtime = parent_path.stat().st_mtime
+                item.path = parent_path.name
+                item.type_ = "file"
+                item.size = parent_path.stat().st_size
+                item.suffix = parent_path.suffix
+                with open(str(parent_path), 'rb') as f:
+                    item.content = f.read()
 
-                # If file
-                elif sub_item.is_file() and str(sub_item.stem)[0] != '.':
-                    item.type_ = "file"
-                    item.name = child_path.name
-                    item.size = child_path.stat().st_size
-                    with open(str(sub_item), 'r') as f:
-                        item.content = f.read()
+                transmit_data.append(item)
+            
 
-                    transmit_data.append(item)
+            # Handle folder with it's contents.
+            elif parent_path.is_dir():
 
-        else:
-            raise FileNotFoundError(
-                    errno.ENOENT, os.strerror(errno.ENOENT), item_name)
+                # Add parent folder first:
+                item = Item()
+                item.path = parent_path.stem
+                item.type_ = "folder"
+                transmit_data.append(item)
 
-        # Data can be sent in a separate thread in order to avoid
-        # blocking the main thread. This is optional.
-        if self.is_async:
-            client_thread = Thread(target = self._transmit_file, args =
-            (transmit_data, parent_path))
-            client_thread.start()
+                # Iterate over all subfolders- and files
+                for sub_item in parent_path.rglob("*"):
+                    item = Item()
+                    child_path = parent_path.stem / sub_item.relative_to(parent_path)
+                    item.path = child_path
+                    # If folder
+                    if sub_item.is_dir():
+                        item.type_ = "folder"
+                        transmit_data.append(item)
 
-        else:
-            self._transmit_file(transmit_data, parent_path)
+                    # If file
+                    elif sub_item.is_file() and str(sub_item.stem)[0] != '.':
+                        item.type_ = "file"
+                        item.name = child_path.name
+                        item.size = child_path.stat().st_size
+                        with open(str(sub_item), 'rb') as f:
+                            item.content = f.read()
+
+                        transmit_data.append(item)
+
+            else:
+                raise FileNotFoundError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), item_name)
+
+            # Data can be sent in a separate thread in order to avoid
+            # blocking the main thread. This is optional.
+            if self.is_async:
+                client_thread = Thread(target = self._transmit_file, args =
+                (transmit_data, parent_path))
+                client_thread.start()
+
+            else:
+                self._transmit_file(transmit_data, parent_path)
+
+            # Only transmit data once if not backup.
+            if not self.use_backup:
+                break
+            
+            # Update frequency.
+            time.sleep(5)
 
 
     def _transmit_file(self, transmit_data, parent_path):
@@ -192,5 +216,18 @@ class Client():
 
         elif parent_path.is_file():
             print("Successfully sent file: {}".format(parent_path.name))
+        
+        # Disconnect from server when data has been sent.
+        # Needed in order to save the files server side.
+        self._disconnect()
 
+    
+    def backup(self, item_name):
+        """
+        Public method to initiate backup of file/folder.
+        Params:
+            item_name (str): File name, can be file or folder.
+        """
+        self.use_backup = True
+        self.transmit(item_name)
 
