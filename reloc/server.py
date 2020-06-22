@@ -18,6 +18,7 @@ import requests
 import logging
 import os
 import datetime
+import shutil
 from threading import Thread, active_count
 
 class Server():
@@ -339,17 +340,16 @@ class Server():
 
                     byte_data = list()
                     while True:
-                        partial = connection.recv(2**16)
-                        if len(partial) <= 0:
+                        partial = connection.recv(2**12)
+                        if not partial:
                             break
 
                         # Appending the partial data to list is a lot
                         # faster than concatenate byte strings.
                         byte_data.append(partial)
-
+                    
                     if byte_data:
                         data = pickle.loads(b''.join(byte_data))
-
                         for item in data:
                             path = self.def_path / item.path
                             if item.type_ == "folder":
@@ -360,7 +360,7 @@ class Server():
                                             path))
 
                             elif item.type_ == "file":
-                                with open(path, 'w') as f:
+                                with open(path, 'wb') as f:
                                     f.write(item.content)
 
                                 if self.use_log:
