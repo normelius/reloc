@@ -18,7 +18,6 @@ import requests
 import logging
 import os
 import datetime
-import shutil
 from threading import Thread, active_count
 
 class Server():
