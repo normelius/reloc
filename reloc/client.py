@@ -71,7 +71,6 @@ class Client():
 
         """
         self.is_async = is_async
-        self.ues_backup = False
         self.timeout = timeout
         self.host = host
         self.port = port
@@ -87,7 +86,7 @@ class Client():
         if not isinstance(self.timeout, (type(None), int, float)) :
             raise TypeError("Timeout specified on the wrong format, " \
                     "should be an int or a float, i.e. 7 or 7.7")
-        
+
         # Connect to the socket
         self._connect()
 
@@ -121,78 +120,71 @@ class Client():
             to the server.
         """
         parent_path = pathlib.Path(item_name).absolute()
-        
-        while True:
-            transmit_data = list()
 
-            # Need to create new socket for each sendall,
-            # otherwise connection won't close server side.
-            if not self.sock:
-                self._connect()
+        transmit_data = list()
 
-            # Handle single file transfer.
-            if parent_path.is_file() and str(parent_path.stem)[0] != '.':
+        # Need to create new socket for each sendall,
+        # otherwise connection won't close server side.
+        if not self.sock:
+            self._connect()
+
+        # Handle single file transfer.
+        if parent_path.is_file() and str(parent_path.stem)[0] != '.':
+            item = Item()
+            item.mtime = parent_path.stat().st_mtime
+            item.path = parent_path.name
+            item.type_ = "file"
+            item.size = parent_path.stat().st_size
+            item.suffix = parent_path.suffix
+            with open(str(parent_path), 'rb') as f:
+                item.content = f.read()
+
+            transmit_data.append(item)
+
+
+        # Handle folder with it's contents.
+        elif parent_path.is_dir():
+
+            # Add parent folder first:
+            item = Item()
+            item.path = parent_path.stem
+            item.type_ = "folder"
+            transmit_data.append(item)
+
+            # Iterate over all subfolders- and files
+            for sub_item in parent_path.rglob("*"):
                 item = Item()
-                item.mtime = parent_path.stat().st_mtime
-                item.path = parent_path.name
-                item.type_ = "file"
-                item.size = parent_path.stat().st_size
-                item.suffix = parent_path.suffix
-                with open(str(parent_path), 'rb') as f:
-                    item.content = f.read()
+                child_path = parent_path.stem / sub_item.relative_to(parent_path)
+                item.path = child_path
+                # If folder
+                if sub_item.is_dir():
+                    item.type_ = "folder"
+                    transmit_data.append(item)
 
-                transmit_data.append(item)
-            
+                # If file
+                elif sub_item.is_file() and str(sub_item.stem)[0] != '.':
+                    item.type_ = "file"
+                    item.name = child_path.name
+                    item.size = child_path.stat().st_size
+                    with open(str(sub_item), 'rb') as f:
+                        item.content = f.read()
 
-            # Handle folder with it's contents.
-            elif parent_path.is_dir():
+                    transmit_data.append(item)
 
-                # Add parent folder first:
-                item = Item()
-                item.path = parent_path.stem
-                item.type_ = "folder"
-                transmit_data.append(item)
+        else:
+            raise FileNotFoundError(
+                    errno.ENOENT, os.strerror(errno.ENOENT), item_name)
 
-                # Iterate over all subfolders- and files
-                for sub_item in parent_path.rglob("*"):
-                    item = Item()
-                    child_path = parent_path.stem / sub_item.relative_to(parent_path)
-                    item.path = child_path
-                    # If folder
-                    if sub_item.is_dir():
-                        item.type_ = "folder"
-                        transmit_data.append(item)
+        # Data can be sent in a separate thread in order to avoid
+        # blocking the main thread. This is optional.
+        if self.is_async:
+            client_thread = Thread(target = self._transmit_file, args =
+            (transmit_data, parent_path))
+            client_thread.start()
 
-                    # If file
-                    elif sub_item.is_file() and str(sub_item.stem)[0] != '.':
-                        item.type_ = "file"
-                        item.name = child_path.name
-                        item.size = child_path.stat().st_size
-                        with open(str(sub_item), 'rb') as f:
-                            item.content = f.read()
+        else:
+            self._transmit_file(transmit_data, parent_path)
 
-                        transmit_data.append(item)
-
-            else:
-                raise FileNotFoundError(
-                        errno.ENOENT, os.strerror(errno.ENOENT), item_name)
-
-            # Data can be sent in a separate thread in order to avoid
-            # blocking the main thread. This is optional.
-            if self.is_async:
-                client_thread = Thread(target = self._transmit_file, args =
-                (transmit_data, parent_path))
-                client_thread.start()
-
-            else:
-                self._transmit_file(transmit_data, parent_path)
-
-            # Only transmit data once if not backup.
-            if not self.use_backup:
-                break
-            
-            # Update frequency.
-            time.sleep(5)
 
 
     def _transmit_file(self, transmit_data, parent_path):
@@ -216,18 +208,7 @@ class Client():
 
         elif parent_path.is_file():
             print("Successfully sent file: {}".format(parent_path.name))
-        
+
         # Disconnect from server when data has been sent.
         # Needed in order to save the files server side.
         self._disconnect()
-
-    
-    def backup(self, item_name):
-        """
-        Public method to initiate backup of file/folder.
-        Params:
-            item_name (str): File name, can be file or folder.
-        """
-        self.use_backup = True
-        self.transmit(item_name)
-
