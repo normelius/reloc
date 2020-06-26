@@ -143,10 +143,6 @@ class Server():
                 # For now, always use same port.
                 port = 1750
 
-            print("Observe that file transfer will only " \
-                    "work on your local network, \n" \
-                    "since the server is starting with internal host.")
-
             if self.use_log:
                 self._update_log('info', 'Server starting locally.')
 
