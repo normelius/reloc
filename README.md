@@ -82,6 +82,8 @@ $ reloc start external 1750 --host 192.168.1.10
 ```
 
 ## Releases
+* 0.0.6 - Fixed bugs with the CLI.
+* 0.0.5 - -
 * 0.0.4 - Major updates to how the CLI works.
 * 0.0.3 - Initial stable release.
 
