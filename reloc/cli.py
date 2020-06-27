@@ -8,6 +8,8 @@ MIT License.
 # Imports
 import argparse
 import sys
+import configparser
+import pathlib
 
 # Reloc imports
 from .client import Client
@@ -79,15 +81,24 @@ Positional:
 
     # Handle different parsers here
     if args.main_parser == 'send':
+        # Try to parse host and port from reloc.ini in home directory.
+        h, p = config()
         if not args.host:
-            args.host = 'localhost'
+            if h:
+                args.host = h
+
+            else:
+                args.host = 'localhost'
         
         if not args.port:
-            args.port = 1750
+            if p:
+                args.port = p
+
+            else:
+                args.port = 1750
         
         client = Client(host = args.host, port = args.port)
         client.transmit(args.file)
-        client.disconnect()
         return
     
     if args.main_parser == 'start':
@@ -102,4 +113,25 @@ Positional:
 
         return
 
+
+def config():
+    """
+    Reads the reloc.ini file (if exist) and try
+    to fetch the specified host and port. Good
+    to use if same host is always used.
+    """
+    conf = configparser.ConfigParser()
+    home = pathlib.Path().home() / 'reloc.ini'
+    if home.exists():
+        conf.read(home)
+        host = conf['Reloc'].get('host')
+        port = conf['Reloc'].get('port')
+        if port:
+            port = int(port)
+    
+    else:
+        host = None
+        port = None
+
+    return host, port
 
